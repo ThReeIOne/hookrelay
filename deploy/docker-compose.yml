@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: hookrelay
+      POSTGRES_PASSWORD: hookrelay
+      POSTGRES_DB: hookrelay
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../migrations:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  hookrelay:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      HOOKRELAY_DATABASE_DSN: "postgresql://hookrelay:hookrelay@postgres:5432/hookrelay?sslmode=disable"
+      HOOKRELAY_REDIS_ADDR: "redis:6379"
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  pgdata:

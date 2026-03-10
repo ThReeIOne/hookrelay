@@ -1,0 +1,34 @@
+server:
+  port: 8080
+  read_timeout: "30s"
+  write_timeout: "30s"
+
+database:
+  dsn: "postgresql://hookrelay:hookrelay@localhost:5432/hookrelay?sslmode=disable"
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: "5m"
+
+delivery:
+  workers: 4
+  poll_interval: "1s"
+  batch_size: 50
+
+api:
+  key: "changeme"
+
+ratelimit:
+  enabled: true
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+logging:
+  level: "info"
+  format: "json"
+
+metrics:
+  enabled: true
+  path: "/metrics"

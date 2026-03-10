@@ -1,0 +1,8 @@
+bin/
+.env
+vendor/
+.idea/
+*.exe
+*.test
+*.out
+/config/config.yaml
