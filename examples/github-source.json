@@ -1,0 +1,1 @@
+{"name":"github","verify_type":"hmac_sha256","verify_config":{"secret":"hookrelay-github-secret-123","header":"X-Hub-Signature-256"},"event_type_header":"X-GitHub-Event","idempotency_header":"X-GitHub-Delivery","description":"GitHub webhooks"}

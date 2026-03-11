@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/hookrelay/hookrelay/internal/metrics"
 	"github.com/hookrelay/hookrelay/internal/store"
 )
 
@@ -16,12 +17,14 @@ var retryDelays = []int{10, 30, 60, 300, 900, 3600, 14400, 43200}
 func scheduleRetry(d *store.Delivery) {
 	if d.AttemptCount >= d.MaxRetries {
 		d.Status = store.StatusDeadLetter
+		metrics.DeadLettersTotal.Inc()
 		now := time.Now()
 		d.CompletedAt = &now
 		return
 	}
 
 	d.Status = store.StatusFailed
+	metrics.RetryTotal.Inc()
 	idx := d.AttemptCount - 1
 	if idx < 0 {
 		idx = 0

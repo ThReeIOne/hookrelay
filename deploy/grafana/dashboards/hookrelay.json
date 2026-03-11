@@ -1,172 +1,191 @@
 {
-  "dashboard": {
-    "id": null,
-    "uid": "hookrelay",
-    "title": "HookRelay",
-    "timezone": "browser",
-    "refresh": "10s",
-    "time": { "from": "now-1h", "to": "now" },
-    "panels": [
-      {
-        "id": 1,
-        "title": "Events Received (rate/min)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
-        "targets": [
-          {
-            "expr": "sum(rate(hookrelay_events_received_total[1m])) * 60",
-            "legendFormat": "events/min"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
+  "id": null,
+  "uid": "hookrelay",
+  "title": "HookRelay Overview",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Events Received (rate/min)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(hookrelay_events_received_total[1m])) * 60",
+          "legendFormat": "events/min",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
         }
-      },
-      {
-        "id": 2,
-        "title": "Deliveries by Status (rate/min)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
-        "targets": [
-          {
-            "expr": "sum(rate(hookrelay_deliveries_total[1m])) by (status) * 60",
-            "legendFormat": "{{status}}"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Deliveries by Status (rate/min)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(hookrelay_deliveries_total[1m])) by (status) * 60",
+          "legendFormat": "{{status}}",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
         }
-      },
-      {
-        "id": 3,
-        "title": "Delivery Queue Depth",
-        "type": "stat",
-        "gridPos": { "h": 8, "w": 4, "x": 16, "y": 0 },
-        "targets": [
-          {
-            "expr": "hookrelay_delivery_queue_depth",
-            "legendFormat": "pending"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "thresholds": {
-              "steps": [
-                { "color": "green", "value": null },
-                { "color": "yellow", "value": 100 },
-                { "color": "red", "value": 1000 }
-              ]
-            }
-          }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Delivery Queue Depth",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 4, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "hookrelay_delivery_queue_depth",
+          "legendFormat": "pending",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
         }
-      },
-      {
-        "id": 4,
-        "title": "Dead Letters Total",
-        "type": "stat",
-        "gridPos": { "h": 8, "w": 4, "x": 20, "y": 0 },
-        "targets": [
-          {
-            "expr": "hookrelay_dead_letters_total",
-            "legendFormat": "dead letters"
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 1000 }
+            ]
           }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "thresholds": {
-              "steps": [
-                { "color": "green", "value": null },
-                { "color": "orange", "value": 10 },
-                { "color": "red", "value": 100 }
-              ]
-            }
-          }
-        }
-      },
-      {
-        "id": 5,
-        "title": "Delivery Latency (ms)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-        "targets": [
-          {
-            "expr": "histogram_quantile(0.50, rate(hookrelay_delivery_duration_ms_bucket[5m]))",
-            "legendFormat": "p50"
-          },
-          {
-            "expr": "histogram_quantile(0.95, rate(hookrelay_delivery_duration_ms_bucket[5m]))",
-            "legendFormat": "p95"
-          },
-          {
-            "expr": "histogram_quantile(0.99, rate(hookrelay_delivery_duration_ms_bucket[5m]))",
-            "legendFormat": "p99"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms" }
-        }
-      },
-      {
-        "id": 6,
-        "title": "Events by Source (rate/min)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-        "targets": [
-          {
-            "expr": "sum(rate(hookrelay_events_received_total[1m])) by (source) * 60",
-            "legendFormat": "{{source}}"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
-        }
-      },
-      {
-        "id": 7,
-        "title": "Rejected Events (rate/min)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
-        "targets": [
-          {
-            "expr": "sum(rate(hookrelay_events_rejected_total[1m])) by (reason) * 60",
-            "legendFormat": "{{reason}}"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
-        }
-      },
-      {
-        "id": 8,
-        "title": "Retries (rate/min)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
-        "targets": [
-          {
-            "expr": "sum(rate(hookrelay_retry_total[1m])) * 60",
-            "legendFormat": "retries/min"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
-        }
-      },
-      {
-        "id": 9,
-        "title": "Rate Limited (rate/min)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
-        "targets": [
-          {
-            "expr": "sum(rate(hookrelay_rate_limited_total[1m])) * 60",
-            "legendFormat": "rate limited/min"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
         }
       }
-    ]
-  },
+    },
+    {
+      "id": 4,
+      "title": "Dead Letters Total",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "hookrelay_dead_letters_total",
+          "legendFormat": "dead letters",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 10 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Delivery Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(hookrelay_delivery_duration_ms_bucket[5m]))",
+          "legendFormat": "p50",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(hookrelay_delivery_duration_ms_bucket[5m]))",
+          "legendFormat": "p95",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(hookrelay_delivery_duration_ms_bucket[5m]))",
+          "legendFormat": "p99",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms" }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Events by Source (rate/min)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(hookrelay_events_received_total[1m])) by (source) * 60",
+          "legendFormat": "{{source}}",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Rejected Events (rate/min)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(hookrelay_events_rejected_total[1m])) by (reason) * 60",
+          "legendFormat": "{{reason}}",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Retries (rate/min)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(hookrelay_retry_total[1m])) * 60",
+          "legendFormat": "retries/min",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Rate Limited (rate/min)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(hookrelay_rate_limited_total[1m])) * 60",
+          "legendFormat": "rate limited/min",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }
+      }
+    }
+  ],
+  "schemaVersion": 39,
   "overwrite": true
 }

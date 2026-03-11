@@ -1,0 +1,1 @@
+{"name":"github-all-to-receiver","source_id":3,"event_filter":["*"],"target_url":"http://localhost:9999/webhook","signing_secret":"my-internal-secret"}

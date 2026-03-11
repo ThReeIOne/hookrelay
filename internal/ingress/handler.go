@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/hookrelay/hookrelay/internal/metrics"
 	"github.com/hookrelay/hookrelay/internal/router"
 	"github.com/hookrelay/hookrelay/internal/store"
 	"github.com/hookrelay/hookrelay/internal/verify"
@@ -63,6 +64,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := v.Verify(source.VerifyConfig, headers, rawBody); err != nil {
+		metrics.EventsRejectedTotal.WithLabelValues("verify_failed").Inc()
 		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "signature verification failed"})
 		return
 	}
@@ -84,6 +86,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		idempotencyKeyPtr = &idempotencyKey
 		existing, _ := h.store.FindEventByIdempotencyKey(r.Context(), source.ID, idempotencyKey)
 		if existing != nil {
+			metrics.EventsRejectedTotal.WithLabelValues("duplicate").Inc()
 			writeJSON(w, http.StatusOK, map[string]any{
 				"status":   "duplicate",
 				"event_id": existing.ID,
@@ -113,6 +116,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error("routing failed", "event_id", event.ID, "error", err)
 	}
+
+	metrics.EventsReceivedTotal.WithLabelValues(source.Name).Inc()
 
 	writeJSON(w, http.StatusOK, map[string]any{
 		"status":     "accepted",

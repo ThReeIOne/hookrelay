@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hookrelay/hookrelay/internal/metrics"
 	"github.com/hookrelay/hookrelay/internal/ratelimit"
 	"github.com/hookrelay/hookrelay/internal/store"
 	"github.com/hookrelay/hookrelay/internal/transform"
@@ -85,6 +86,8 @@ func (e *Engine) poll(ctx context.Context) {
 		return
 	}
 
+	metrics.DeliveryQueueDepth.Set(float64(len(deliveries)))
+
 	var wg sync.WaitGroup
 	for _, d := range deliveries {
 		wg.Add(1)
@@ -111,6 +114,7 @@ func (e *Engine) deliver(ctx context.Context, d *store.Delivery) {
 
 	// Rate limit check
 	if !e.rateLimiter.Allow(ctx, d.SubscriptionID, sub.RateLimitRPS) {
+		metrics.RateLimitedTotal.Inc()
 		next := time.Now().Add(time.Second)
 		d.NextAttemptAt = &next
 		if err := e.store.UpdateDelivery(ctx, d); err != nil {
@@ -182,6 +186,7 @@ func (e *Engine) deliver(ctx context.Context, d *store.Delivery) {
 
 	resp, err := e.httpClient.Do(req)
 	durationMs := int(time.Since(start).Milliseconds())
+	metrics.DeliveryDurationMs.Observe(float64(durationMs))
 
 	// Record attempt
 	attempt := &store.DeliveryAttempt{
@@ -196,6 +201,7 @@ func (e *Engine) deliver(ctx context.Context, d *store.Delivery) {
 	if err != nil {
 		attempt.Error = err.Error()
 		d.LastError = truncate(err.Error(), 2000)
+		metrics.DeliveriesTotal.WithLabelValues("error").Inc()
 		scheduleRetry(d)
 	} else {
 		defer resp.Body.Close()
@@ -208,9 +214,11 @@ func (e *Engine) deliver(ctx context.Context, d *store.Delivery) {
 
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			d.Status = store.StatusSuccess
+			metrics.DeliveriesTotal.WithLabelValues("success").Inc()
 			now := time.Now()
 			d.CompletedAt = &now
 		} else {
+			metrics.DeliveriesTotal.WithLabelValues("failed").Inc()
 			scheduleRetry(d)
 		}
 	}
