@@ -14,16 +14,16 @@ func TestMemoryRateLimiter_ZeroAndNegativeRPS(t *testing.T) {
 		name string
 		rps  int
 	}{
-		{name: "zero rps rejects", rps: 0},
-		{name: "negative rps rejects", rps: -1},
-		{name: "very negative rps rejects", rps: -100},
+		{name: "zero rps allows (no limit)", rps: 0},
+		{name: "negative rps allows (no limit)", rps: -1},
+		{name: "very negative rps allows (no limit)", rps: -100},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := rl.Allow(ctx, 1, tt.rps)
-			if got != false {
-				t.Errorf("Allow(ctx, 1, %d) = %v, want false", tt.rps, got)
+			if got != true {
+				t.Errorf("Allow(ctx, 1, %d) = %v, want true (no limit)", tt.rps, got)
 			}
 		})
 	}

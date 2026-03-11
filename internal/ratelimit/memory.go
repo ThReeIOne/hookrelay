@@ -28,7 +28,7 @@ func NewMemoryRateLimiter() *MemoryRateLimiter {
 // under the specified requests-per-second limit.
 func (r *MemoryRateLimiter) Allow(_ context.Context, subscriptionID int64, rps int) bool {
 	if rps <= 0 {
-		return false
+		return true // no limit
 	}
 
 	// Load or create the window for this subscription.
